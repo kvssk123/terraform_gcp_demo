@@ -1,0 +1,39 @@
+name: CI for Cloud Composer DAGs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    - name: Run tests
+      run: pytest
+      
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+      - name: Delete DAGs from Google Cloud Storage
+        run: gsutil rm -rf 'gs://us-central1-de-project-flig-fd3d4b44-bucket/dags/**'
+      - name: Upload DAGs to Google Cloud Storage
+        run: gsutil cp -r dags/* gs://us-central1-de-project-flig-fd3d4b44-bucket/dags
