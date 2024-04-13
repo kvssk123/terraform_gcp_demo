@@ -36,4 +36,4 @@ jobs:
       - name: Delete DAGs from Google Cloud Storage
         run: gsutil rm -rf 'gs://us-central1-terraform-gcp-d-4f3e4de3-bucket/dags/**'
       - name: Upload DAGs to Google Cloud Storage
-        run: gsutil cp -r dags/* gs://us-central1-terraform-gcp-d-4f3e4de3-bucket/dags
+        run: gsutil cp -r dags/* gs://us-central1-terraform-gcp-d-4f3e4de3-bucket/dags/
